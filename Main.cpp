@@ -33,7 +33,7 @@ float size = 1;
 // Vertices coordinates
 GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
-		(size * - 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		(size * -0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
 		(size * -0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
 		 (size * 0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
 		 (size * 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
@@ -51,24 +51,6 @@ GLuint indices[] =
 	3, 0, 4
 };
 
-void processInput(GLFWwindow* window, Camera& camera)
-{
-	ImGuiIO& io = ImGui::GetIO();
-
-	// Skip input processing if ImGui is handling the input
-	if (io.WantCaptureKeyboard) return;
-
-	float cameraSpeed = 0.05f; // Adjust this value to change movement speed
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.Position += cameraSpeed * camera.Orientation; // Move forward
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.Position -= cameraSpeed * camera.Orientation; // Move backward
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.Position -= glm::normalize(glm::cross(camera.Orientation, camera.Up)) * cameraSpeed; // Move left
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.Position += glm::normalize(glm::cross(camera.Orientation, camera.Up)) * cameraSpeed; // Move right
-}
 
 int main()
 {
@@ -182,13 +164,13 @@ int main()
 
 		shaderProgram.Activate();
 
-		// Only process camera inputs if ImGui is not focused
 		ImGuiIO& io = ImGui::GetIO();
-		if (!io.WantCaptureKeyboard) {
-			processInput(window, camera);
+		if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
+			camera.Inputs(window);
 		}
 
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+
 
 		// Bind texture and VAO, then draw
 		brickTex.Bind();
@@ -197,7 +179,6 @@ int main()
 			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
 		}
 
-		// ImGui UI
 		ImGui::Begin("Test");
 		ImGui::Text("hello world");
 		ImGui::Checkbox("Draw Triangle", &drawTriangle);
@@ -205,11 +186,9 @@ int main()
 		ImGui::ColorEdit4("Color", color);
 		ImGui::End();
 
-		// Update shader with the current size and color values
 		glUseProgram(shaderProgram.ID);
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
-
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
