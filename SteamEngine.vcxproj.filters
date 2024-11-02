@@ -14,21 +14,42 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Source Files\imgui">
-      <UniqueIdentifier>{7b652fda-2b1d-4bcf-b7de-3302eb5b6d12}</UniqueIdentifier>
+      <UniqueIdentifier>{0c138275-214d-4d0d-8da3-b74cd882cb18}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\imgui">
-      <UniqueIdentifier>{18e4d3d4-4aed-4270-b50d-0eda8a44536a}</UniqueIdentifier>
+      <UniqueIdentifier>{80a8d907-9d12-4779-8aa0-fcd71aac42be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shader">
+      <UniqueIdentifier>{32977811-a25f-4b2a-a8ad-aff498150500}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="opengltest.cpp">
+    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
-      <Filter>Source Files\imgui</Filter>
+    <ClCompile Include="EBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shaderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VBO.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_tables.cpp">
       <Filter>Source Files\imgui</Filter>
@@ -45,11 +66,32 @@
     <ClCompile Include="imgui\imgui_draw.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
     <ClCompile Include="imgui\imgui_impl_glfw.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VAO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="imgui\imstb_rectpack.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
@@ -57,9 +99,6 @@
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imstb_truetype.h">
-      <Filter>Header Files\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imconfig.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui.h">
@@ -74,5 +113,24 @@
     <ClInclude Include="imgui\imgui_internal.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\Downloads\pop_cat.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="brick.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="default.vert">
+      <Filter>Resource Files\Shader</Filter>
+    </None>
+    <None Include="default.frag">
+      <Filter>Resource Files\Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
