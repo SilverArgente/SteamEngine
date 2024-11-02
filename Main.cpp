@@ -3,6 +3,10 @@
 namespace fs = std::filesystem;
 //------------------------------
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -22,17 +26,18 @@ namespace fs = std::filesystem;
 
 const unsigned int width = 800;
 const unsigned int height = 800;
+float size = 1;
 
 
 
 // Vertices coordinates
 GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
+		(size * - 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		(size * -0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+		 (size * 0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		 (size * 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+		 (size * 0.0f), (size * 0.8f),  (size * 0.0f),     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
 };
 
 // Indices for vertices order
@@ -46,6 +51,24 @@ GLuint indices[] =
 	3, 0, 4
 };
 
+void processInput(GLFWwindow* window, Camera& camera)
+{
+	ImGuiIO& io = ImGui::GetIO();
+
+	// Skip input processing if ImGui is handling the input
+	if (io.WantCaptureKeyboard) return;
+
+	float cameraSpeed = 0.05f; // Adjust this value to change movement speed
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.Position += cameraSpeed * camera.Orientation; // Move forward
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.Position -= cameraSpeed * camera.Orientation; // Move backward
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.Position -= glm::normalize(glm::cross(camera.Orientation, camera.Up)) * cameraSpeed; // Move left
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.Position += glm::normalize(glm::cross(camera.Orientation, camera.Up)) * cameraSpeed; // Move right
+}
 
 int main()
 {
@@ -128,33 +151,76 @@ int main()
 	// Creates camera object
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
+	shaderProgram.Activate();
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
+	bool drawTriangle = true;
+
+	float size = 1.0f;
+	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
+	glUseProgram(shaderProgram.ID);
+	glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
+	glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
-		// Specify the color of the background
+		// Start a new ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		// Render the OpenGL content
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		// Clean the back buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// Tell OpenGL which Shader Program we want to use
+
 		shaderProgram.Activate();
 
-		// Handles camera inputs
-		camera.Inputs(window);
-		// Updates and exports the camera matrix to the Vertex Shader
+		// Only process camera inputs if ImGui is not focused
+		ImGuiIO& io = ImGui::GetIO();
+		if (!io.WantCaptureKeyboard) {
+			processInput(window, camera);
+		}
+
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
 
-		// Binds texture so that is appears in rendering
+		// Bind texture and VAO, then draw
 		brickTex.Bind();
-		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
-		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
-		// Swap the back buffer with the front buffer
+		if (drawTriangle) {
+			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+		}
+
+		// ImGui UI
+		ImGui::Begin("Test");
+		ImGui::Text("hello world");
+		ImGui::Checkbox("Draw Triangle", &drawTriangle);
+		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
+		ImGui::ColorEdit4("Color", color);
+		ImGui::End();
+
+		// Update shader with the current size and color values
+		glUseProgram(shaderProgram.ID);
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
+		glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Swap buffers and poll events
 		glfwSwapBuffers(window);
-		// Take care of all GLFW events
 		glfwPollEvents();
 	}
 
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 
 	// Delete all the objects we've created
