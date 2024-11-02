@@ -149,10 +149,14 @@ int main()
 	glUseProgram(shaderProgram.ID);
 	glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
+	float lastFrame = 0.0f;
+	float deltaTime = 0.0f;
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
+		float currentFrame = glfwGetTime();
+		deltaTime = (currentFrame - lastFrame) * 50;
 		// Start a new ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -166,7 +170,7 @@ int main()
 
 		ImGuiIO& io = ImGui::GetIO();
 		if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
-			camera.Inputs(window);
+			camera.Inputs(window, deltaTime);
 		}
 
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
@@ -195,6 +199,7 @@ int main()
 		// Swap buffers and poll events
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		lastFrame = currentFrame;
 	}
 
 	ImGui_ImplOpenGL3_Shutdown();
