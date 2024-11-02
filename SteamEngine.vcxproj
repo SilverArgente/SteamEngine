@@ -177,3 +177,4 @@
     <None Include="default.frag" />
     <None Include="default.vert" />
   </ItemGroup>
+</Project>
