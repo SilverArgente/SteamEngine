@@ -30,7 +30,7 @@ const unsigned int width = 800;
 const unsigned int height = 800;
 float size = 1;
 
-int s = (N + 2) * (N + 2) * (N + 2);
+int s = (N + 2) * (N + 2) * (N + 2) * 8;
 int m = 0;
 int t = 20 * 20 * 20 * 8;
 GLfloat* vertices = new GLfloat[s];
@@ -115,7 +115,7 @@ void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram)
 					float x = (i / (float)(N + 2)) * 2.0f - 1.0f;
 					float y = (j / (float)(N + 2)) * 2.0f - 1.0f; // Normalized y
 					float z = (k / (float)(N + 2)) * 2.0f - 1.0f; // Normalized z
-
+					
 					vertices[m++] = x;
 					vertices[m++] = y;
 					vertices[m++] = z;
@@ -130,13 +130,15 @@ void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram)
 	}
 
 	// Create a VBO with the vertex positions
-	VBO vbo(vertices, t * sizeof(GLfloat));
+	VBO vbo(vertices, s * sizeof(GLfloat));
 	vao.Bind(); // Bind the VAO
 	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)0);
 
 	glPointSize(3);
 
 	glDrawArrays(GL_POINTS, 0, s / 8);
+
+	m = 0;
 
 }
 
@@ -271,15 +273,15 @@ int main()
 		brickTex.Bind();
 		VAO1.Bind();
 
-		fluidSim.dens = new float[s];
-		fluidSim.dens_prev = new float[s];
-		fluidSim.vel_x = new float[s];
-		fluidSim.vel_y = new float[s];
-		fluidSim.vel_z = new float[s];
+		fluidSim.dens = new float[s/8];
+		fluidSim.dens_prev = new float[s/8];
+		fluidSim.vel_x = new float[s/8];
+		fluidSim.vel_y = new float[s/8];
+		fluidSim.vel_z = new float[s/8];
 
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++) {
-				for (int k = 0; k < N; k++) {
+		for (int i = 0; i < N + 2; i++) {
+			for (int j = 0; j < N + 2; j++) {
+				for (int k = 0; k < N + 2; k++) {
 					// Randomize velocity directions in 3D
 					fluidSim.vel_x[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
 					fluidSim.vel_y[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
