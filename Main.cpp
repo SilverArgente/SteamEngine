@@ -24,14 +24,14 @@ namespace fs = std::filesystem;
 
 
 
-const unsigned int width = 800;
-const unsigned int height = 800;
+const unsigned int width = 1000;
+const unsigned int height = 1000;
 float size = 1;
 
 
 
 // Vertices coordinates
-GLfloat vertices[] =
+GLfloat tri_vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
 		(size * -0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
 		(size * -0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
@@ -41,7 +41,7 @@ GLfloat vertices[] =
 };
 
 // Indices for vertices order
-GLuint indices[] =
+GLuint tri_indices[] =
 {
 	0, 1, 2,
 	0, 2, 3,
@@ -49,6 +49,45 @@ GLuint indices[] =
 	1, 2, 4,
 	2, 3, 4,
 	3, 0, 4
+};
+
+GLfloat cube_vertices[] = {
+	//						COORDINATES       /						COLORS          /	TexCoord  //
+		(-size * 0.25f), (-size * .25f), (-size * 0.25f),     1.0f, 0.0f, 0.0f,    0.0f, 0.0f,  // Bottom-left-front
+		 (size * 0.25f), (-size * 0.25f), (-size * 0.25f),     0.0f, 1.0f, 0.0f,    1.0f, 0.0f,  // Bottom-right-front
+		 (size * 0.25f),  (size * 0.25f), (-size * 0.25f),     0.0f, 0.0f, 1.0f,    1.0f, 1.0f,  // Top-right-front
+		(-size * 0.25f),  (size * 0.25f), (-size * 0.25f),     1.0f, 1.0f, 0.0f,    0.0f, 1.0f,  // Top-left-front
+
+		(-size * 0.25f), (-size * 0.25f),  (size * 0.25f),     1.0f, 0.0f, 1.0f,    0.0f, 0.0f,  // Bottom-left-back
+		 (size * 0.25f), (-size * 0.25f),  (size * 0.25f),     0.0f, 1.0f, 1.0f,    1.0f, 0.0f,  // Bottom-right-back
+		 (size * 0.25f),  (size * 0.25f),  (size * 0.25f),     1.0f, 1.0f, 1.0f,    1.0f, 1.0f,  // Top-right-back
+		(-size * 0.25f),  (size * 0.25f),  (size * 0.25f),     0.2f, 0.2f, 0.2f,    0.0f, 1.0f   // Top-left-back
+};
+
+GLuint cube_indices[] = {
+	// Front face
+	0, 1, 2,
+	2, 3, 0,
+
+	// Back face
+	4, 5, 6,
+	6, 7, 4,
+
+	// Left face
+	4, 0, 3,
+	3, 7, 4,
+
+	// Right face
+	1, 5, 6,
+	6, 2, 1,
+
+	// Top face
+	3, 2, 6,
+	6, 7, 3,
+
+	// Bottom face
+	4, 5, 1,
+	1, 0, 4
 };
 
 
@@ -93,9 +132,9 @@ int main()
 	VAO1.Bind();
 
 	// Generates Vertex Buffer Object and links it to vertices
-	VBO VBO1(vertices, sizeof(vertices));
+	VBO VBO1(tri_vertices, sizeof(tri_vertices));
 	// Generates Element Buffer Object and links it to indices
-	EBO EBO1(indices, sizeof(indices));
+	EBO EBO1(tri_indices, sizeof(tri_indices));
 
 	// Links VBO attributes such as coordinates and colors to VAO
 	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
@@ -105,6 +144,25 @@ int main()
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
+
+
+	// Generates Vertex Array Object and binds it
+	VAO VAO2;
+	VAO2.Bind();
+
+	// Generates Vertex Buffer Object and links it to vertices
+	VBO VBO2(cube_vertices, sizeof(cube_vertices));
+	// Generates Element Buffer Object and links it to indices
+	EBO EBO2(cube_indices, sizeof(cube_indices));
+
+	// Links VBO attributes such as coordinates and colors to VAO
+	VAO2.LinkAttrib(VBO2, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	VAO2.LinkAttrib(VBO2, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	VAO2.LinkAttrib(VBO2, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	// Unbind all to prevent accidentally modifying them
+	VAO2.Unbind();
+	VBO2.Unbind();
+	EBO2.Unbind();
 
 
 
@@ -143,6 +201,7 @@ int main()
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	bool drawTriangle = true;
+	bool drawCube = false;
 
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
@@ -177,15 +236,21 @@ int main()
 
 
 		// Bind texture and VAO, then draw
-		brickTex.Bind();
-		VAO1.Bind();
 		if (drawTriangle) {
-			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+			brickTex.Bind();
+			VAO1.Bind();
+			glDrawElements(GL_TRIANGLES, sizeof(tri_indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+		}
+		if (drawCube) {
+			brickTex.Bind();
+			VAO2.Bind();
+			glDrawElements(GL_TRIANGLES, sizeof(cube_indices) / sizeof(int), GL_UNSIGNED_INT, 0);
 		}
 
 		ImGui::Begin("Test");
 		ImGui::Text("hello world");
-		ImGui::Checkbox("Draw Triangle", &drawTriangle);
+		ImGui::Checkbox("Draw Pyramid", &drawTriangle);
+		ImGui::Checkbox("Draw Cube", &drawCube);
 		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
 		ImGui::ColorEdit4("Color", color);
 		ImGui::End();
@@ -211,6 +276,9 @@ int main()
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+	VAO2.Delete();
+	VBO2.Delete();
+	EBO2.Delete();
 	brickTex.Delete();
 	shaderProgram.Delete();
 	// Delete window before ending the program
