@@ -296,7 +296,10 @@ int main()
 				}
 			}
 		}
-
+		
+		//fluidSim.vel_step(N, fluidSim.vel_x, fluidSim.vel_y, fluidSim.vel_z, fluidSim.vel_x_prev, fluidSim.vel_y_prev, fluidSim.vel_z_prev, 0.6f, 0.6f);
+		//fluidSim.vel_step(N,)
+		//fluidSim.dens_step(N, fluidSim.dens, fluidSim.dens_prev, fluidSim.vel_x, fluidSim.vel_y, fluidSim.vel_z, 0.5, 0.6f);
 		draw_dens(fluidSim, shaderProgram);
 		// generateRandom(shaderProgram, 100);
 
