@@ -36,7 +36,7 @@ void Camera::Inputs(GLFWwindow* window, float deltaTime)
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		Position += velocity * glm::normalize(glm::cross(Orientation, Up));
+		Position += velocity * -glm::normalize(glm::cross(Orientation, Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
@@ -44,7 +44,7 @@ void Camera::Inputs(GLFWwindow* window, float deltaTime)
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		Position += velocity * -glm::normalize(glm::cross(Orientation, Up));
+		Position += velocity * glm::normalize(glm::cross(Orientation, Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 	{

@@ -26,35 +26,53 @@ namespace fs = std::filesystem;
 
 // Define precision for fluid simulation
 
-const unsigned int width = 800;
-const unsigned int height = 800;
+const unsigned int width = 1920;
+const unsigned int height = 1080;
 float size = 1;
+
 
 int s = (N + 2) * (N + 2) * (N + 2) * 8;
 int m = 0;
 int t = 20 * 20 * 20 * 8;
 GLfloat* vertices = new GLfloat[s];
 
+GLfloat cube_vertices[] = {
+	//						COORDINATES       /						COLORS          /	TexCoord  //
+		(-size * 0.25f), (-size * .25f), (-size * 0.25f),     1.0f, 0.0f, 0.0f,    0.0f, 0.0f,  // Bottom-left-front
+		 (size * 0.25f), (-size * 0.25f), (-size * 0.25f),     0.0f, 1.0f, 0.0f,    1.0f, 0.0f,  // Bottom-right-front
+		 (size * 0.25f),  (size * 0.25f), (-size * 0.25f),     0.0f, 0.0f, 1.0f,    1.0f, 1.0f,  // Top-right-front
+		(-size * 0.25f),  (size * 0.25f), (-size * 0.25f),     1.0f, 1.0f, 0.0f,    0.0f, 1.0f,  // Top-left-front
 
-// Vertices coordinates
-/*GLfloat vertices[] =
-{ //     COORDINATES     /        COLORS      /   TexCoord  //
-		0.0f, 0.0f, 0.0f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-		0.1f, 0.1f, 0.1f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-		0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-		 (size * 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-		 (size * 0.0f), (size * 0.8f),  (size * 0.0f),     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
-};*/
+		(-size * 0.25f), (-size * 0.25f),  (size * 0.25f),     1.0f, 0.0f, 1.0f,    0.0f, 0.0f,  // Bottom-left-back
+		 (size * 0.25f), (-size * 0.25f),  (size * 0.25f),     0.0f, 1.0f, 1.0f,    1.0f, 0.0f,  // Bottom-right-back
+		 (size * 0.25f),  (size * 0.25f),  (size * 0.25f),     1.0f, 1.0f, 1.0f,    1.0f, 1.0f,  // Top-right-back
+		(-size * 0.25f),  (size * 0.25f),  (size * 0.25f),     0.2f, 0.2f, 0.2f,    0.0f, 1.0f   // Top-left-back
+};
 
-// Indices for vertices order
-GLuint indices[] =
-{
+GLuint cube_indices[] = {
+	// Front face
 	0, 1, 2,
-	0, 2, 3,
-	0, 1, 4,
-	1, 2, 4,
-	2, 3, 4,
-	3, 0, 4
+	2, 3, 0,
+
+	// Back face
+	4, 5, 6,
+	6, 7, 4,
+
+	// Left face
+	4, 0, 3,
+	3, 7, 4,
+
+	// Right face
+	1, 5, 6,
+	6, 2, 1,
+
+	// Top face
+	3, 2, 6,
+	6, 7, 3,
+
+	// Bottom face
+	4, 5, 1,
+	1, 0, 4
 };
 
 float generateRandomNumber() {
@@ -129,8 +147,9 @@ void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram)
 		}
 	}
 	GLint opacityLoc = glGetUniformLocation(shaderProgram.ID, "opacity");
-	float newOpacity = 0.1f;
+	float newOpacity = 0.25f;
 	glUniform1f(opacityLoc, newOpacity);
+
 	// Create a VBO with the vertex positions
 	VBO vbo(vertices, s * sizeof(GLfloat));
 	vao.Bind(); // Bind the VAO
@@ -143,6 +162,11 @@ void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram)
 	m = 0;
 
 }
+
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+	// Update your projection matrix if necessary
+};
 
 int main()
 {
@@ -167,6 +191,10 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+
+	// resize window
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
 	// Introduce the window into the current context
 	glfwMakeContextCurrent(window);
 
@@ -180,24 +208,28 @@ int main()
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag");
 
+	// Generates Shader object using shaders default.vert and default.frag
+	Shader shaderProgram2("default2.vert", "default2.frag");
+
+
 
 	// Generates Vertex Array Object and binds it
-	VAO VAO1;
-	VAO1.Bind();
+	VAO VAO2;
+	VAO2.Bind();
 
 	// Generates Vertex Buffer Object and links it to vertices
-	VBO VBO1(vertices, sizeof(vertices));
+	VBO VBO2(cube_vertices, sizeof(cube_vertices));
 	// Generates Element Buffer Object and links it to indices
-	EBO EBO1(indices, sizeof(indices));
+	EBO EBO2(cube_indices, sizeof(cube_indices));
 
 	// Links VBO attributes such as coordinates and colors to VAO
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	VAO2.LinkAttrib(VBO2, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	VAO2.LinkAttrib(VBO2, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	VAO2.LinkAttrib(VBO2, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	// Unbind all to prevent accidentally modifying them
-	VAO1.Unbind();
-	VBO1.Unbind();
-	EBO1.Unbind();
+	VAO2.Unbind();
+	VBO2.Unbind();
+	EBO2.Unbind();
 
 
 
@@ -235,13 +267,17 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	bool drawTriangle = false;
+	bool drawCube = false;
 
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 	glUseProgram(shaderProgram.ID);
 	glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
+
+	
+
+
 	float lastFrame = 0.0f;
 	float deltaTime = 0.0f;
 	glEnable(GL_BLEND);
@@ -265,17 +301,19 @@ int main()
 
 		shaderProgram.Activate();
 
+		GLint opacityLoc = glGetUniformLocation(shaderProgram.ID, "opacity");
+		float newOpacity = 0.25f;
+		glUniform1f(opacityLoc, newOpacity);
+
+		shaderProgram2.Activate();
+
 		ImGuiIO& io = ImGui::GetIO();
 		if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
 			camera.Inputs(window, deltaTime);
 		}
 
-		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram2, "camMatrix");
 
-
-		// Bind texture and VAO, then draw
-		brickTex.Bind();
-		VAO1.Bind();
 
 		fluidSim.dens = new float[s/8];
 		fluidSim.dens_prev = new float[s/8];
@@ -303,13 +341,20 @@ int main()
 		draw_dens(fluidSim, shaderProgram);
 		// generateRandom(shaderProgram, 100);
 
-		if (drawTriangle) {
-			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+		// Bind texture and VAO, then draw
+		if (drawCube) {
+			brickTex.Bind();
+			VAO2.Bind();
+			shaderProgram2.Activate();
+			GLint cubeOpacityLoc = glGetUniformLocation(shaderProgram2.ID, "opacity");
+			float cubeOpacity = 1.0f; // Set your desired opacity for the cube
+			glUniform1f(cubeOpacityLoc, cubeOpacity);
+			glDrawElements(GL_TRIANGLES, sizeof(cube_indices) / sizeof(int), GL_UNSIGNED_INT, 0);
 		}
 
-		ImGui::Begin("Test");
-		ImGui::Text("hello world");
-		ImGui::Checkbox("Draw Triangle", &drawTriangle);
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::Begin("Control Panel");
+		ImGui::Checkbox("Draw Cube", &drawCube);
 		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
 		ImGui::ColorEdit4("Color", color);
 		ImGui::End();
@@ -317,6 +362,10 @@ int main()
 		glUseProgram(shaderProgram.ID);
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
+
+		glUseProgram(shaderProgram2.ID);
+		glUniform1f(glGetUniformLocation(shaderProgram2.ID, "size"), size);
+		glUniform4f(glGetUniformLocation(shaderProgram2.ID, "color"), color[0], color[1], color[2], color[3]);
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -332,9 +381,6 @@ int main()
 
 
 	// Delete all the objects we've created
-	VAO1.Delete();
-	VBO1.Delete();
-	EBO1.Delete();
 	brickTex.Delete();
 	shaderProgram.Delete();
 	// Delete window before ending the program
