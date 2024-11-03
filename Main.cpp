@@ -21,6 +21,7 @@ namespace fs = std::filesystem;
 #include"VBO.h"
 #include"EBO.h"
 #include"Camera.h"
+#include "FluidSimulation.h"
 
 // Define precision for fluid simulation
 #define N 100
@@ -52,6 +53,44 @@ GLuint indices[] =
 	2, 3, 4,
 	3, 0, 4
 };
+
+/*
+void draw_dens(const FluidSimulation& sim, Shader& shaderProgram, float maxDensity, float cellSize) {
+	// Use the shader program
+	glUseProgram(shaderProgram.ID);
+
+	// Iterate through each cell in the 3D grid
+	for (int i = 1; i <= sim.n; i++) {
+		for (int j = 1; j <= sim.n; j++) {
+			for (int k = 1; k <= sim.n; k++) {
+				// Get the density value for the current grid cell
+				float density = sim.dens[IX(i, j, k)];
+
+				// Calculate opacity and color intensity based on density
+				float opacity = density / maxDensity;         // Normalized for transparency
+				float colorIntensity = density / maxDensity;  // Normalized for color
+
+				// Pass color and opacity to the shader as a uniform
+				glUniform4f(glGetUniformLocation(shaderProgram.ID, "cellColor"),
+					colorIntensity, colorIntensity, 1.0f - colorIntensity, opacity);
+
+				// Compute the cube position in the grid
+				glm::vec3 position = glm::vec3(i * cellSize, j * cellSize, k * cellSize);
+
+				// Model transformation matrix for the cube position
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, position);
+				glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+				// Bind VAO for the cube and render it
+				cubeVAO.Bind();  // Assuming `cubeVAO` represents a pre-configured VAO for drawing a cube
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}
+		}
+	}
+}*/
+
+
 
 
 int main()
