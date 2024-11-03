@@ -151,6 +151,11 @@ int main()
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
 
 	// Main while loop
+	glm::vec4 vec(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::mat4 trans = glm::mat4(1.0f);
+	float movespeed = 0.01f;
+
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Start a new ImGui frame
@@ -179,18 +184,41 @@ int main()
 			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
 		}
 
+		float xOffset = 0.0f;
+		float yOffset = 0.0f;
+		float zOffset = 0.0f;
+		//int dir = -1;
+		
+
 		ImGui::Begin("Test");
 		ImGui::Text("hello world");
 		ImGui::Checkbox("Draw Triangle", &drawTriangle);
 		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
 		ImGui::ColorEdit4("Color", color);
+		xOffset = movespeed * (-((int)ImGui::ArrowButton("Left", ImGuiDir_Left)) + (int)ImGui::ArrowButton("Right", ImGuiDir_Right));
+		yOffset = movespeed * ((int)ImGui::ArrowButton("Up", ImGuiDir_Up) - (int)ImGui::ArrowButton("Down", ImGuiDir_Down));
+		zOffset = movespeed * ((int)ImGui::Button("Forward") - (int)ImGui::Button("Back"));
 		ImGui::End();
+
+		
+		trans = glm::translate(trans, glm::vec3(xOffset, yOffset, zOffset));
+		
+		vec = trans * vec;
+		//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+		//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+
+		unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+		
 
 		glUseProgram(shaderProgram.ID);
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "size"), size);
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
 
 		// Swap buffers and poll events
 		glfwSwapBuffers(window);

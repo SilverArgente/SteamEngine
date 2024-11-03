@@ -72,6 +72,9 @@
     <ClCompile Include="imgui\imgui_impl_glfw.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="ObjectTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -130,6 +133,9 @@
       <Filter>Resource Files\Shader</Filter>
     </None>
     <None Include="default.frag">
+      <Filter>Resource Files\Shader</Filter>
+    </None>
+    <None Include="default.transform">
       <Filter>Resource Files\Shader</Filter>
     </None>
   </ItemGroup>

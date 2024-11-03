@@ -8,9 +8,10 @@ out vec2 texCoord;
 
 uniform float size;
 uniform mat4 camMatrix;
+uniform mat4 transform;
 void main()
 {
-   gl_Position = camMatrix * vec4(size * aPos, 1.0);
+   gl_Position = camMatrix * transform * vec4(size * aPos, 1.0f);
    color = aColor;
    texCoord = aTex;
 }
