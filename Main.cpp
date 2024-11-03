@@ -36,9 +36,9 @@ float size = 1;
 // Vertices coordinates
 GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
-		(size * -0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-		(size * -0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-		 (size * 0.5f), (size * 0.0f), (size * -0.5f),     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+		0.1f, 0.1f, 0.1f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+		0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
 		 (size * 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
 		 (size * 0.0f), (size * 0.8f),  (size * 0.0f),     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
 };
@@ -54,17 +54,22 @@ GLuint indices[] =
 	3, 0, 4
 };
 
-
-void draw_dens(Shader& shaderProgram) {
-	
+void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram) {
+	// 
 	VAO vao;
 	vao.Bind();
+	
+	// Create a VBO with the vertex positions
 	VBO vbo(vertices, sizeof(vertices));
-	glDrawArrays(GL_POINTS, 1, 5);
+	vao.Bind(); // Bind the VAO
+	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)0);                  // Positions
+	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)(3 * sizeof(GLfloat))); // Colors
+	vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, sizeof(GLfloat) * 8, (void*)(6 * sizeof(GLfloat)));
+
+	glPointSize(10);
+	// Specify the number of points to draw
+	glDrawArrays(GL_POINTS, 0, sizeof(vertices) / (sizeof(GLfloat) * 8));
 }
-
-
-
 
 int main()
 {
@@ -169,6 +174,7 @@ int main()
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
+		FluidSimulation fluidSim;
 		float currentFrame = glfwGetTime();
 		deltaTime = (currentFrame - lastFrame) * 50;
 		// Start a new ImGui frame
@@ -177,7 +183,7 @@ int main()
 		ImGui::NewFrame();
 
 		// Render the OpenGL content
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shaderProgram.Activate();
@@ -194,7 +200,7 @@ int main()
 		brickTex.Bind();
 		VAO1.Bind();
 
-		draw_dens(shaderProgram);
+		draw_dens(fluidSim, shaderProgram);
 
 		if (drawTriangle) {
 			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
