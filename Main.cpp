@@ -51,6 +51,19 @@ GLuint indices[] =
 	3, 0, 4
 };
 
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+	// Update your projection matrix if necessary
+};
+
+static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+	if (yoffset < 0) {
+
+	}
+	else {
+
+	}
+};
 
 int main()
 {
@@ -64,9 +77,13 @@ int main()
 	// Tell GLFW we are using the CORE profile
 	// So that means we only have the modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	
+	// Create a GLFWwindow object of width by height pixels
+	GLFWwindow* window = glfwCreateWindow(width, height, "SteamEngine", NULL, NULL);
+	
+	// resize window
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
 	// Error check if the window fails to create
 	if (window == NULL)
 	{
