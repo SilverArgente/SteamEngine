@@ -30,7 +30,7 @@ const unsigned int width = 800;
 const unsigned int height = 800;
 float size = 1;
 
-int s = (N + 2) * (N + 2) * (N + 2) * 8;
+int s = (N + 2) * (N + 2) * (N + 2);
 int m = 0;
 int t = 20 * 20 * 20 * 8;
 GLfloat* vertices = new GLfloat[s];
@@ -136,13 +136,13 @@ void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram)
 
 	glPointSize(3);
 
-	glDrawArrays(GL_POINTS, 0, t / 8);
+	glDrawArrays(GL_POINTS, 0, s / 8);
 
 }
 
 int main()
 {
-	srand(NULL);
+	srand(time(0)); // Seed random number generator
 	// Initialize GLFW
 	glfwInit();
 
@@ -270,6 +270,26 @@ int main()
 		// Bind texture and VAO, then draw
 		brickTex.Bind();
 		VAO1.Bind();
+
+		fluidSim.dens = new float[s];
+		fluidSim.dens_prev = new float[s];
+		fluidSim.vel_x = new float[s];
+		fluidSim.vel_y = new float[s];
+		fluidSim.vel_z = new float[s];
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				for (int k = 0; k < N; k++) {
+					// Randomize velocity directions in 3D
+					fluidSim.vel_x[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+					fluidSim.vel_y[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+					fluidSim.vel_z[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+
+					// Randomize density
+					fluidSim.dens[IX(i, j, k)] = (rand() % 100) / 100.0f * 0.5f;
+				}
+			}
+		}
 
 		draw_dens(fluidSim, shaderProgram);
 		// generateRandom(shaderProgram, 100);
