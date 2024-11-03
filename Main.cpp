@@ -22,13 +22,15 @@ namespace fs = std::filesystem;
 #include"EBO.h"
 #include"Camera.h"
 
-
+// Define precision for fluid simulation
+#define N 100
+#define arr_size (N+2)*(N+2)*(N+2)
+#define IX(i, j, k) ((k + (j * N+2)) + i * (N+2) * (N+2))
+#define SWAP(x0, x) {float *tmp = x0; x0 = x; x = tmp;}
 
 const unsigned int width = 800;
 const unsigned int height = 800;
 float size = 1;
-
-
 
 // Vertices coordinates
 GLfloat vertices[] =
