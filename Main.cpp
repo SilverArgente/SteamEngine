@@ -128,13 +128,15 @@ void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram)
 			}
 		}
 	}
-
+	GLint opacityLoc = glGetUniformLocation(shaderProgram.ID, "opacity");
+	float newOpacity = 0.1f;
+	glUniform1f(opacityLoc, newOpacity);
 	// Create a VBO with the vertex positions
 	VBO vbo(vertices, s * sizeof(GLfloat));
 	vao.Bind(); // Bind the VAO
 	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)0);
 
-	glPointSize(3);
+	glPointSize(20);
 
 	glDrawArrays(GL_POINTS, 0, s / 8);
 
@@ -242,6 +244,8 @@ int main()
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "color"), color[0], color[1], color[2], color[3]);
 	float lastFrame = 0.0f;
 	float deltaTime = 0.0f;
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
