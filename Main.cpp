@@ -7,6 +7,7 @@ namespace fs = std::filesystem;
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <random>
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -24,24 +25,26 @@ namespace fs = std::filesystem;
 #include "FluidSimulation.h"
 
 // Define precision for fluid simulation
-#define N 100
-#define arr_size (N+2)*(N+2)*(N+2)
-#define IX(i, j, k) ((k + (j * N+2)) + i * (N+2) * (N+2))
-#define SWAP(x0, x) {float *tmp = x0; x0 = x; x = tmp;}
 
 const unsigned int width = 800;
 const unsigned int height = 800;
 float size = 1;
 
+int s = (N + 2) * (N + 2) * (N + 2) * 8;
+int m = 0;
+int t = 20 * 20 * 20 * 8;
+GLfloat* vertices = new GLfloat[s];
+
+
 // Vertices coordinates
-GLfloat vertices[] =
+/*GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
 		0.0f, 0.0f, 0.0f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
 		0.1f, 0.1f, 0.1f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
 		0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
 		 (size * 0.5f), (size * 0.0f),  (size * 0.5f),     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
 		 (size * 0.0f), (size * 0.8f),  (size * 0.0f),     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
-};
+};*/
 
 // Indices for vertices order
 GLuint indices[] =
@@ -54,25 +57,92 @@ GLuint indices[] =
 	3, 0, 4
 };
 
-void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram) {
-	// 
+float generateRandomNumber() {
+	// Create a random device and a generator
+	std::random_device rd; // Get a random number from hardware
+	std::mt19937 generator(rd()); // Seed the generator
+	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f); // Define the range
+
+	return distribution(generator); // Generate the random number
+}
+
+/*void generateRandom(Shader& shaderProgram, int n)
+{
 	VAO vao;
 	vao.Bind();
-	
-	// Create a VBO with the vertex positions
-	VBO vbo(vertices, sizeof(vertices));
-	vao.Bind(); // Bind the VAO
-	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)0);                  // Positions
-	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)(3 * sizeof(GLfloat))); // Colors
-	vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, sizeof(GLfloat) * 8, (void*)(6 * sizeof(GLfloat)));
 
-	glPointSize(10);
-	// Specify the number of points to draw
-	glDrawArrays(GL_POINTS, 0, sizeof(vertices) / (sizeof(GLfloat) * 8));
+	GLfloat* va = new GLfloat[n];
+
+	va[m++] = generateRandomNumber();
+	va[m++] = generateRandomNumber();
+	va[m++] = generateRandomNumber();
+	va[m++] = 0.83f;
+	va[m++] = 0.70f;
+	va[m++] = 0.44f;
+	va[m++] = 0.0f;
+	va[m++] = 0.0f;
+
+	VBO vbo(vertices, n * sizeof(GLfloat));
+	vao.Bind(); // Bind the VAO
+	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)0);
+
+	glPointSize(3);
+
+	glDrawArrays(GL_POINTS, 0, n / 8);
+
+	delete[] va;
+}*/
+
+void draw_dens(FluidSimulation& fluidSim, Shader& shaderProgram) 
+{
+	VAO vao;
+	vao.Bind();
+
+	int size = (N + 2) * (N + 2) * (N + 2);
+
+	// iterate over all densities
+	// assign a point to said density
+	// render point on screen
+
+	for (int i = 0; i < N + 2; i++) {
+		for (int j = 0; j < N + 2; j++) {
+			for (int k = 0; k < N + 2; k++) {
+
+				float density = fluidSim.dens[IX(i, j, k)];
+				
+				if (density > 0)
+				{
+					float x = (i / (float)(N + 2)) * 2.0f - 1.0f;
+					float y = (j / (float)(N + 2)) * 2.0f - 1.0f; // Normalized y
+					float z = (k / (float)(N + 2)) * 2.0f - 1.0f; // Normalized z
+
+					vertices[m++] = x;
+					vertices[m++] = y;
+					vertices[m++] = z;
+					vertices[m++] = 0.83f;
+					vertices[m++] = 0.70f;
+					vertices[m++] = 0.44f;
+					vertices[m++] = 0.0f;
+					vertices[m++] = 0.0f;
+				}
+			}
+		}
+	}
+
+	// Create a VBO with the vertex positions
+	VBO vbo(vertices, t * sizeof(GLfloat));
+	vao.Bind(); // Bind the VAO
+	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(GLfloat) * 8, (void*)0);
+
+	glPointSize(3);
+
+	glDrawArrays(GL_POINTS, 0, t / 8);
+
 }
 
 int main()
 {
+	srand(NULL);
 	// Initialize GLFW
 	glfwInit();
 
@@ -177,6 +247,7 @@ int main()
 		FluidSimulation fluidSim;
 		float currentFrame = glfwGetTime();
 		deltaTime = (currentFrame - lastFrame) * 50;
+		float dt = currentFrame - lastFrame;
 		// Start a new ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -201,6 +272,7 @@ int main()
 		VAO1.Bind();
 
 		draw_dens(fluidSim, shaderProgram);
+		// generateRandom(shaderProgram, 100);
 
 		if (drawTriangle) {
 			glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);

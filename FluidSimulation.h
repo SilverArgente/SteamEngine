@@ -1,7 +1,7 @@
 #ifndef FLUIDSIM_H
 #define FLUIDSIM_H
-#define N 1000
-#define IX(i, j, k) ((k + (j * N+2)) + i * (N+2) * (N+2))
+#define N 10
+#define IX(i, j, k) ((k + (j * (N+2))) + i * (N+2) * (N+2))
 
 class FluidSimulation {
 public:
