@@ -282,24 +282,32 @@ int main()
 		fluidSim.vel_x = new float[s/8];
 		fluidSim.vel_y = new float[s/8];
 		fluidSim.vel_z = new float[s/8];
+		fluidSim.vel_x_prev = new float[s / 8];
+		fluidSim.vel_y_prev = new float[s / 8];
+		fluidSim.vel_z_prev = new float[s / 8];
 
 		for (int i = 0; i < N + 2; i++) {
 			for (int j = 0; j < N + 2; j++) {
 				for (int k = 0; k < N + 2; k++) {
-					// Randomize velocity directions in 3D
-					fluidSim.vel_x[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
-					fluidSim.vel_y[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
-					fluidSim.vel_z[IX(i, j, k)] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+					int index = IX(i, j, k);
+
+					fluidSim.vel_x[index] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+					fluidSim.vel_y[index] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+					fluidSim.vel_z[index] = ((rand() % 100) / 100.0f - 0.5f) * 0.1f;
+
+					fluidSim.vel_x_prev[index] = fluidSim.vel_x[index];
+					fluidSim.vel_y_prev[index] = fluidSim.vel_y[index];
+					fluidSim.vel_z_prev[index] = fluidSim.vel_z[index];
 
 					// Randomize density
-					fluidSim.dens[IX(i, j, k)] = (rand() % 100) / 100.0f * 0.5f;
+					fluidSim.dens[index] = (rand() % 100) / 100.0f * 0.5f;
+					fluidSim.dens_prev[index] = fluidSim.dens[index];
 				}
 			}
 		}
 		
-		//fluidSim.vel_step(N, fluidSim.vel_x, fluidSim.vel_y, fluidSim.vel_z, fluidSim.vel_x_prev, fluidSim.vel_y_prev, fluidSim.vel_z_prev, 0.6f, 0.6f);
-		//fluidSim.vel_step(N,)
-		//fluidSim.dens_step(N, fluidSim.dens, fluidSim.dens_prev, fluidSim.vel_x, fluidSim.vel_y, fluidSim.vel_z, 0.5, 0.6f);
+		fluidSim.vel_step(N, fluidSim.vel_x, fluidSim.vel_y, fluidSim.vel_z, fluidSim.vel_x_prev, fluidSim.vel_y_prev, fluidSim.vel_z_prev, 0.05f, dt);
+		//fluidSim.dens_step(N, fluidSim.dens, fluidSim.dens_prev, fluidSim.vel_x, fluidSim.vel_y, fluidSim.vel_z, 0.05, dt);
 		draw_dens(fluidSim, shaderProgram);
 		// generateRandom(shaderProgram, 100);
 

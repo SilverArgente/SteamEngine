@@ -1,4 +1,5 @@
 #include "FluidSimulation.h"
+#include <iostream>
 
 void swap(float* x1, float* x2)
 {
@@ -7,7 +8,7 @@ void swap(float* x1, float* x2)
 	x2 = temp;
 }
 
-void set_bnd(int n, int b, float* x) {
+void FluidSimulation::set_bnd(int n, int b, float* x) {
 	int i, j, k;
 
 	// Set boundaries on the x-axis faces
@@ -66,7 +67,7 @@ void set_bnd(int n, int b, float* x) {
 }
 
 
-void add_source(int n, float* x, float* s, float dt)
+void FluidSimulation::add_source(int n, float* x, float* s, float dt)
 {
 	int i, size = (n + 2) * (n + 2);
 
@@ -75,7 +76,7 @@ void add_source(int n, float* x, float* s, float dt)
 
 }
 
-void diffuse(int n, int b, float* x, float* x0, float diff, float dt)
+void FluidSimulation::diffuse(int n, int b, float* x, float* x0, float diff, float dt)
 {
 	int i, j, k, m;
 	float a = dt * diff * n * n * n;
@@ -97,7 +98,7 @@ void diffuse(int n, int b, float* x, float* x0, float diff, float dt)
 	}
 }
 
-void advect(int n, int b, float* d, float* d0, float* vel_x, float* vel_y, float* vel_z, float dt) {
+void FluidSimulation::advect(int n, int b, float* d, float* d0, float* vel_x, float* vel_y, float* vel_z, float dt) {
 	int i, j, k, i0, j0, k0, i1, j1, k1;
 	float x, y, z, s0, t0, r0, s1, t1, r1, dt0;
 
@@ -117,12 +118,13 @@ void advect(int n, int b, float* d, float* d0, float* vel_x, float* vel_y, float
 				s1 = x - i0; s0 = 1.0f - s1;
 				t1 = y - j0; t0 = 1.0f - t1;
 				r1 = z - k0; r0 = 1.0f - r1;
-
-				d[IX(i, j, k)] =
-					s0 * (t0 * (r0 * d0[IX(i0, j0, k0)] + r1 * d0[IX(i0, j0, k1)]) +
-						t1 * (r0 * d0[IX(i0, j1, k0)] + r1 * d0[IX(i0, j1, k1)])) +
+				
+				d[IX(i, j, k)] = 2;
+				/*
+				s0* (t0 * (r0 * d0[IX(i0, j0, k0)] + r1 * d0[IX(i0, j0, k1)]) +
+					t1 * (r0 * d0[IX(i0, j1, k0)] + r1 * d0[IX(i0, j1, k1)])) +
 					s1 * (t0 * (r0 * d0[IX(i1, j0, k0)] + r1 * d0[IX(i1, j0, k1)]) +
-						t1 * (r0 * d0[IX(i1, j1, k0)] + r1 * d0[IX(i1, j1, k1)]));
+						t1 * (r0 * d0[IX(i1, j1, k0)] + r1 * d0[IX(i1, j1, k1)]))*/
 			}
 		}
 	}
@@ -130,7 +132,7 @@ void advect(int n, int b, float* d, float* d0, float* vel_x, float* vel_y, float
 	set_bnd(N, b, d);
 }
 
-void project(int n, float* vel_x, float* vel_y, float* vel_z, float* p, float* div) {
+void FluidSimulation::project(int n, float* vel_x, float* vel_y, float* vel_z, float* p, float* div) {
 	int i, j, k, iter;
 	float h = 1.0f / n;
 
@@ -180,7 +182,7 @@ void project(int n, float* vel_x, float* vel_y, float* vel_z, float* p, float* d
 	set_bnd(N, 3, vel_z);
 }
 
-void dens_step(int n, float* dens, float* dens_prev, float* vel_x, float* vel_y, float* vel_z, float diff, float dt)
+void FluidSimulation::dens_step(int n, float* dens, float* dens_prev, float* vel_x, float* vel_y, float* vel_z, float diff, float dt)
 {
 	add_source(n, dens, dens_prev, dt);
 	swap(dens, dens_prev);
@@ -190,23 +192,23 @@ void dens_step(int n, float* dens, float* dens_prev, float* vel_x, float* vel_y,
 
 }
 
-void vel_step(int n, float* vel_x, float* vel_y, float* vel_z,
+void FluidSimulation::vel_step(int n, float* vel_x, float* vel_y, float* vel_z,
 	float* vel_x_prev, float* vel_y_prev, float* vel_z_prev,
 	float visc, float dt)
 {
 	add_source(n, vel_x, vel_x_prev, dt);
 	add_source(n, vel_y, vel_y_prev, dt);
 	add_source(n, vel_z, vel_z_prev, dt);
-
+	
 	swap(vel_x_prev, vel_x);
 	diffuse(N, 1, vel_x, vel_x_prev, visc, dt);
-
+	
 	swap(vel_y_prev, vel_y);
 	diffuse(N, 2, vel_y, vel_y_prev, visc, dt);
-
+	
 	swap(vel_z_prev, vel_z);
 	diffuse(N, 3, vel_z, vel_z_prev, visc, dt);
-
+	/*
 	project(N, vel_x, vel_y, vel_z, vel_x_prev, vel_y_prev);
 
 	swap(vel_x_prev, vel_x);
@@ -218,4 +220,5 @@ void vel_step(int n, float* vel_x, float* vel_y, float* vel_z,
 	advect(n, 3, vel_z, vel_z_prev, vel_x_prev, vel_y_prev, vel_z_prev, dt);
 
 	project(n, vel_x, vel_y, vel_z, vel_x_prev, vel_y_prev);
+	*/
 }
